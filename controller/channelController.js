@@ -5,13 +5,13 @@ async function getChannelInfo(req, res) {
     if (!req.params.id) {
       return res.json({ result: false, error: "missing channel ID" });
     }
-    console.log("id is", req.params.id);
+
     const response = await fetch(
       `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${req.params.id}&key=${API_KEY}`
     );
 
     const data = await response.json();
-    console.log("data is:", data);
+
     if (data.pageInfo.totalResults === 0) {
       return res.json({ result: false, error: "No results found" });
     }
