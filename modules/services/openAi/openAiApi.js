@@ -1,4 +1,4 @@
-async function extractSubcategories(prompt, retries = 3, delay = 1000) {
+async function queryOpenAI(prompt, retries = 3, delay = 1000) {
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -16,9 +16,11 @@ async function extractSubcategories(prompt, retries = 3, delay = 1000) {
 
       if (!response.ok) {
         if (response.status === 429) {
-          console.warn(`Rate limit encountered. Retrying in ${delay}ms... (Attempt ${attempt + 1}/${retries})`);
+          console.warn(
+            `Rate limit encountered. Retrying in ${delay}ms... (Attempt ${attempt + 1}/${retries})`
+          );
           await new Promise((resolve) => setTimeout(resolve, delay));
-          delay *= 2; // Double the delay each retry
+          delay *= 2;
           continue;
         } else {
           throw new Error(`HTTP Error: ${response.status}`);
@@ -26,7 +28,13 @@ async function extractSubcategories(prompt, retries = 3, delay = 1000) {
       }
 
       const data = await response.json();
-      return data;
+      let content = data?.choices?.[0]?.message?.content || "{}";
+
+      // Remove ```json or ``` wrappers
+      content = content.replace(/```json|```/g, "").trim();
+
+      const parsed = JSON.parse(content);
+      return parsed;
     } catch (error) {
       if (attempt === retries - 1) {
         console.error("Final attempt failed:", error);
@@ -38,3 +46,5 @@ async function extractSubcategories(prompt, retries = 3, delay = 1000) {
     }
   }
 }
+
+module.exports = { queryOpenAI };

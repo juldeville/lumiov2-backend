@@ -1,18 +1,22 @@
-function generateSubcategoryPrompt(videos) {
-  const formattedVideos = videos
+const youtubeCategories = require("../../../../constants/youtubeCategories");
+
+function generateSubcategoryPrompt(topCategory) {
+  const formattedVideos = topCategory.videos
     .map((video, index) => {
       const tags = video.tags?.length ? video.tags.join(", ") : "(none)";
       const description = video.description?.trim() || "(none)";
-      return `${index + 1}. **Title:** "${video.title}"\n   **Tags:** ${tags}\n   **Description:** "${description}"`;
+      return `${index + 1}. **Title:** "${
+        video.title
+      }"\n   **Tags:** ${tags}\n   **Description:** "${description}"`;
     })
     .join("\n\n");
-
+  const category = youtubeCategories[topCategory.categoryId];
   const prompt = `
 You are a categorization assistant. Given a list of YouTube video details from a specific category, determine the **top 4 most relevant subcategories** based on recurring themes in the titles, tags, and descriptions.
 
 ### **Instructions:**
 - Identify dominant subcategories based on recurring words, topics, and context.
-- Choose from relevant subcategories for **${videos[0].categoryName}**, such as:
+- Choose from relevant subcategories for **${category}**, such as:
   - **Football (Soccer)**
   - **Basketball**
   - **Tennis**
@@ -35,3 +39,5 @@ ${formattedVideos}
 
   return prompt;
 }
+
+module.exports = { generateSubcategoryPrompt };
